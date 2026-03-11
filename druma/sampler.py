@@ -3,10 +3,17 @@ import numpy as np
 class Sampler:
     def __init__(self):
         self.instruments = {} # nombre, (wavfile, volumen, pitch)
+        self.instruments_ord = [] # para mantener el orden de los instrumentos
         self.currently_playing = []
+
+    def get_instrument_name(self, index):
+        if index < len(self.instruments_ord):
+            return self.instruments_ord[index]
+        return None
 
     def add_instrument(self, name, wavfile, volume=1.0, pitch=1.0):
         self.instruments[name] = (wavfile, volume, pitch)
+        self.instruments_ord.append(name)
 
     def add_to_play(self, instrument):
         if instrument in self.instruments:
@@ -31,3 +38,13 @@ class Sampler:
         # Aquí se debería cargar el wavfile, aplicar el volumen y el pitch, y devolver el resultado como un np.array
         pass
 
+
+    def set_volume(self, volume, instrument):
+        if instrument in self.instruments:
+            wavfile, _, pitch = self.instruments[instrument]
+            self.instruments[instrument] = (wavfile, volume, pitch)
+
+    def set_pitch(self, pitch, instrument):
+        if instrument in self.instruments:
+            wavfile, volume, _ = self.instruments[instrument]
+            self.instruments[instrument] = (wavfile, volume, pitch)
