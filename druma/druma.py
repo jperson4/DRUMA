@@ -2,14 +2,17 @@ import asyncio
 from clock import Clock
 from sequencer import Sequencer
 from sampler import Sampler
+from player import Player
 
 class Druma:
+    ''' Gestiona los componentes y conecta todo'''
+
     def __init__(self, bpm=120, steps=16):
         self.CV = asyncio.Event()
         self.clock = Clock(CV=self.CV, bpm=bpm, steps=steps)
         self.sampler = Sampler()
         self.sequencer = Sequencer(self.sampler, steps=steps)
-        self.player = None # TODO reproductor 
+        self.player = Player()
         self.playing = False
 
     async def start(self):
