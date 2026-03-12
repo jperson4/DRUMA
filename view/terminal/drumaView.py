@@ -1,0 +1,49 @@
+from druma.druma import Druma
+from view.terminal.utils import color
+
+class DrumaView:
+    def __init__(self, druma: Druma):
+        self.druma = druma
+
+    def display(self):
+        patterns = self.druma.get_patterns()
+        instruments = self.druma.get_instruments()
+        curr_step = self.druma.get_current_step()
+        ret = "Druma view\n"
+        ret += "Instruments:\n"
+        for i, (name, volume, pitch) in enumerate(instruments):
+            ret += f"{i}: {name} (vol: {volume}, pitch: {pitch})\n"
+
+        ret += "\nPatterns:\n"
+        general_pattern = [0] * self.druma.get_steps()
+        general_pattern[curr_step] = 1
+        ret += self.display_pattern(general_pattern, curr_step) + " : Current step\n"
+
+        for name, _, _ in instruments:
+            ret += f"{self.display_pattern(patterns[name], curr_step)} : {name}\n"
+        return ret
+
+    def display_pattern(self, pattern, curr_step):
+        ret = ""
+        for step, value in enumerate(pattern):
+            if step % 4 == 0:
+                ret += " "
+            if step == curr_step:
+                if value == 2:
+                    ret += color('▮', 'yellow')
+                elif value == 1:
+                    ret += color('▮', 'bright_yellow')
+                elif value > 0:
+                    ret += color('▮', 'bright_yellow')
+                else:
+                    ret += color('▯', 'bright_yellow')
+            else:
+                if value == 2:
+                    ret += "▮"
+                elif value == 1:
+                    ret += "▮"
+                elif value > 0:
+                    ret += "▮"
+                else:
+                    ret += "▯"
+        return ret

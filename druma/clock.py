@@ -9,9 +9,8 @@ class Clock:
         self.running = False
         self.CV = CV
 
-    def tick(self):
-        self.CV.set()
-        self.current_step = (self.current_step + 1) % self.steps
+    def get_current_step(self):
+        return self.current_step
         
     def set_bpm(self, bpm):
         self.bpm = bpm
@@ -19,8 +18,17 @@ class Clock:
     async def start(self):
         self.running = True
         while self.running:
-            self.tick()
-            await asyncio.sleep(60 / self.bpm / self.signature)
+            self.tick() # avanza un paso de reloj y activa el CV 
+            await asyncio.sleep(60 / self.bpm)
             
     def stop(self):
         self.running = False
+
+    def tick(self): 
+        self.CV.set()
+        self.current_step = (self.current_step + 1) % self.steps
+
+    async def wait(self):
+        ''' En cuanto se activa el CV, se desbloquea esta función y se vuelve a bloquear el CV para esperar al siguiente tick del reloj'''
+        await self.CV.wait()
+        self.CV.clear()
