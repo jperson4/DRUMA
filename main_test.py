@@ -8,8 +8,11 @@ async def main():
 
     sampler = Sampler({
         # name, (path, volume, pitch)
-        'kick': ('path', 1, 1),
-        'hihat': ('aa', 1, 1)
+        'kick': ('samples/909_simple/Kick.wav', 1, 1),
+        'hh_open': ('samples/909_simple/HHOpen.wav', 1, 1),
+        'hh_closed': ('samples/909_simple/HHClosed.wav', 1, 1),
+        'snare': ('samples/909_simple/Snare.wav', 1, 1),
+        'clap': ('samples/909_simple/Clap.wav', 1, 1),
     })
 
     druma = Druma(

@@ -2,8 +2,8 @@ import asyncio
 from druma.clock import Clock
 from druma.sequencer import Sequencer
 from druma.sampler import Sampler
-# from druma.player import Player
-from druma.player_mock import Player
+from druma.player import Player
+# from druma.player_mock import Player
 
 class Druma:
     ''' Gestiona los componentes y conecta todo'''
@@ -18,7 +18,8 @@ class Druma:
         self.selected_instrument = 0
 
     async def start(self):
-        await asyncio.create_task(self.clock.start())
+        self.playing = True
+        asyncio.create_task(self.clock.start())
         while self.playing:
             await self.clock.wait() # se desbloquea cada ciclo del reloj
             self.sequencer.next_step(self.clock.current_step)
@@ -38,6 +39,13 @@ class Druma:
         # ins_name = instrument or self.sampler.get_instrument_name(self.selected_instrument)
         if ins_name is not None:
             self.sequencer.set_step(step, ins_name)
+            
+    def get_instrument_volume(self, instrument=None):
+        _ins = instrument or self.selected_instrument
+        ins_name = self.sampler.get_instrument_name(_ins)
+        if ins_name is not None:
+            return self.sampler.instruments[ins_name][1]
+        return None
 
     def set_volume(self, volume, instrument=None):
         _ins = instrument or self.selected_instrument
@@ -50,6 +58,13 @@ class Druma:
         ins_name = self.sampler.get_instrument_name(_ins)
         if ins_name is not None:
             self.sampler.set_pitch(pitch, ins_name)
+            
+    def get_instrument_pitch(self, instrument=None):
+        _ins = instrument or self.selected_instrument
+        ins_name = self.sampler.get_instrument_name(_ins)
+        if ins_name is not None:
+            return self.sampler.instruments[ins_name][2]
+        return None
 
     def get_patterns(self):
         return self.sequencer.get_patterns()

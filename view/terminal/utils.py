@@ -31,4 +31,5 @@ def color(text, color_name):
 
 def clear_terminal():
     # os.system('cls' if os.name == 'nt' else 'clear')
-    print("\033[2J\033[H", end="")
+    # print("\033[2J\033[H", end="")
+    pass

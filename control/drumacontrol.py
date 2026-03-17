@@ -8,10 +8,11 @@ class SequencerControl:
     '''
     def __init__(self, druma):
         self.druma = druma
+        
 
         self.selected_instrument = None
-        self.selected_pitch = 1.0
-        self.selected_volume = 1.0 # TODO podria hacer que la velocity estuviera ligada al volumen
+        # self.selected_pitch = 1.0
+        # self.selected_volume = 1.0 # TODO podria hacer que la velocity estuviera ligada al volumen
 
     def handle_msg(self, msg):
         ''' Ejecuta la acción correspondiente al mensaje traducido'''
@@ -20,9 +21,10 @@ class SequencerControl:
             self.druma.set_instrument(msg.instrument)
         elif msg.type == MessageType.STEP:
             self.druma.set_step(msg.step, self.selected_instrument) # TODO ver si hay que pasarle el instrumento o no
-        elif msg.type == MessageType.VOLUME:
-            self.selected_volume = msg.volume
-            self.druma.set_volume(msg.volume, self.selected_instrument)
-        elif msg.type == MessageType.PITCH:
-            self.selected_pitch = msg.pitch
-            self.druma.set_pitch(msg.pitch, self.selected_instrument)
+        elif msg.type == MessageType.VOLUME_INCREMENT:
+            new_volume = msg.volume + self.druma.get_instrument_volume(self.selected_instrument)
+            new_volume = max(0, new_volume) # limitar el volumen entre 0 y 1
+            self.druma.set_volume(new_volume, self.selected_instrument)
+        elif msg.type == MessageType.PITCH_INCREMENT:
+            new_pitch = msg.pitch + self.druma.get_instrument_pitch(self.selected_instrument)
+            self.druma.set_pitch(new_pitch, self.selected_instrument)

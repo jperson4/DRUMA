@@ -16,10 +16,11 @@ class Sequencer:
     def next_step(self, step):
         ''' Carga los sonidos de los instrumentos que deben sonar del sampler en el siguiente tick del reloj'''
         for instrument, pattern in self.patterns.items():
+            
             if pattern[step] == 2:
                 self.sampler.add_to_play(instrument, 1, accent=True)
 
-            if pattern[step] > 1:
+            if pattern[step] <= 1 and pattern[step] > 0:
                 self.sampler.add_to_play(instrument, pattern[step]) # añade el sonido del instrumento a la lista de sonidos a reproducir en el siguiente tick del reloj
 
     def get_patterns(self):
