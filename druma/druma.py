@@ -63,5 +63,8 @@ class Druma:
     def get_current_step(self):
         return self.clock.get_current_step()
     
+    def get_selected_instrument(self):
+        return self.selected_instrument
+    
     def get_steps(self):
         return self.clock.steps

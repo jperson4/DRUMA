@@ -1,6 +1,8 @@
 from druma.druma import Druma
 from view.terminal.utils import color
 
+INSTRUMENT_KEYS = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k']
+
 class DrumaView:
     def __init__(self, druma: Druma):
         self.druma = druma
@@ -12,13 +14,15 @@ class DrumaView:
         ret = "Druma view\n"
         ret += "Instruments:\n"
         for i, (name, volume, pitch) in enumerate(instruments):
-            ret += f"{i}: {name} (vol: {volume}, pitch: {pitch})\n"
-
+            inst = f"{i}{INSTRUMENT_KEYS[i%len(INSTRUMENT_KEYS)]}: {name} (vol: {volume}, pitch: {pitch})\n"
+            if i == self.druma.get_selected_instrument():
+                inst = color(inst, 'bright_yellow')
+            ret += inst
+            
         ret += "\nPatterns:\n"
         general_pattern = [0] * self.druma.get_steps()
         general_pattern[curr_step] = 1
         ret += self.display_pattern(general_pattern, curr_step) + " : Current step\n"
-
         for name, _, _ in instruments:
             ret += f"{self.display_pattern(patterns[name], curr_step)} : {name}\n"
         return ret

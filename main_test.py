@@ -7,6 +7,7 @@ from control.keyboardcontrol import keyboardControl
 async def main():
 
     sampler = Sampler({
+        # name, (path, volume, pitch)
         'kick': ('path', 1, 1),
         'hihat': ('aa', 1, 1)
     })
