@@ -9,7 +9,7 @@ class Sequencer:
         for instrument in self.sampler.instruments:
             self.patterns[instrument] = [0] * self.steps
 
-    def set_beat(self, step, instrument, vol=1):
+    def set_step(self, step, instrument, vol=1):
         if instrument in self.patterns:
             self.patterns[instrument][step] = 0 if self.patterns[instrument][step] > 0 else vol
 

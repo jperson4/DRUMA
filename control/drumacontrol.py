@@ -1,5 +1,4 @@
-import mido
-from message import *
+from control.message import *
 # Recibe el imput del midi
 
 class SequencerControl:
@@ -7,9 +6,8 @@ class SequencerControl:
         hay muchas cosas por hacer como que hacer con los controles de pitch y de volumen
         y que hacer con lo de las octavas    
     '''
-    def __init__(self, druma, midi_in):
+    def __init__(self, druma):
         self.druma = druma
-        self.midi_in = midi_in
 
         self.selected_instrument = None
         self.selected_pitch = 1.0

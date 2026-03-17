@@ -32,12 +32,12 @@ class Druma:
     def set_instrument(self, instrument):
         self.selected_instrument = instrument
 
-    def set_beat(self, step, instrument=None):
+    def set_step(self, step, instrument=None):
         _ins = instrument or self.selected_instrument
         ins_name = self.sampler.get_instrument_name(_ins)
         # ins_name = instrument or self.sampler.get_instrument_name(self.selected_instrument)
         if ins_name is not None:
-            self.sequencer.set_beat(step, ins_name)
+            self.sequencer.set_step(step, ins_name)
 
     def set_volume(self, volume, instrument=None):
         _ins = instrument or self.selected_instrument

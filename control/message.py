@@ -41,25 +41,25 @@ class MsgInstrument(Message):
 class MsgVolume(Message):
     def __init__(self, volume):
         ''' El volumen es un valor entre 0 y 1 que indica el volumen absoluto'''
-        super().__init__(MessageType.VOLUME, volume)
+        super().__init__(MessageType.VOLUME)
         self.volume = volume
 
 class MsgVolume_Increment(Message):
     def __init__(self, volume):
         ''' El volumen es un valor entre 0 y 1 que indica el incremento o decremento del volumen actual'''
-        super().__init__(MessageType.VOLUME_INCREMENT, volume)
+        super().__init__(MessageType.VOLUME_INCREMENT)
         self.volume = volume
 
 class MsgPitch(Message):
     def __init__(self, pitch):
         ''' El pitch es un valor que indica la altura del sonido'''
-        super().__init__(MessageType.PITCH, pitch)
+        super().__init__(MessageType.PITCH)
         self.pitch = pitch
 
 class MsgPitch_Increment(Message):
     def __init__(self, pitch):
         ''' El pitch es un valor que indica el incremento o decremento del pitch actual'''
-        super().__init__(MessageType.PITCH_INCREMENT, pitch)
+        super().__init__(MessageType.PITCH_INCREMENT)
         self.pitch = pitch
 
 class MsgMute(Message):

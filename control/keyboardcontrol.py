@@ -1,18 +1,26 @@
+import asyncio
 import keyboard
 from control.message import *
+from control.drumacontrol import SequencerControl
 
 class keyboardControl:
-    def __init__(self, midi_in, drumaControl):
-        self.midi_in = midi_in
-        self.drumaControl = drumaControl
+    def __init__(self, druma):
+        self.drumaControl = SequencerControl(druma)
 
-    def start(self):
-        while True:
-            event = keyboard.read_event()
+    async def start(self):
+        
+        loop = asyncio.get_event_loop()
+
+        def on_key(event):
             if event.event_type == keyboard.KEY_DOWN:
                 m = self.translate_msg(event)
                 if m is not None:
-                    self.drumaControl.handle_msg(m)
+                    # llama al handler de forma thread-safe
+                    loop.call_soon_threadsafe(self.drumaControl.handle_msg, m)
+
+        keyboard.hook(on_key)
+        while True:
+            await asyncio.sleep(1) # mantener el loop corriendo
 
     def translate_msg(self, event) -> Message:
         ''' Traduce el evento del teclado a una acción en el secuenciador'''
