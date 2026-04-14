@@ -2,7 +2,7 @@ import pygame
 
 class Player:
     def __init__(self):
-        pygame.mixer.init()
+        pygame.mixer.init(channels=1)  # Mono por simplicidad
 
     def play(self, sound):
         if sound is not None and sound.size > 0:

@@ -19,7 +19,7 @@ async def main():
     player = Player()
 
     druma = Druma(
-        bpm=140,
+        bpm=145,
         sampler=sampler,
         player=player
     )

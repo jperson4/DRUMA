@@ -13,6 +13,7 @@ class Sampler:
         
         for name, (wavpath, volume, pitch) in instruments.items():
             self.update_instrument(name, wavpath, volume, pitch)
+            self.instruments_ord.append(name)
         # self.instruments_ord = list(self.instruments.keys())  # para mantener el orden de los instrumentos
         self.currently_playing = []
         
@@ -21,7 +22,6 @@ class Sampler:
         try:
             wav = self.process_instrument(name, wavpath, volume, pitch)
             self.instruments[name] = (wav, volume, pitch, wavpath)
-            self.instruments_ord.append(name)
         except Exception as e:
             print(f"Error loading instrument {name} from {wavpath}: {e}")
         

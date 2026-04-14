@@ -19,7 +19,7 @@ class Clock:
         self.running = True
         while self.running:
             self.tick() # avanza un paso de reloj y activa el CV 
-            await asyncio.sleep(60 / self.bpm)
+            await asyncio.sleep(60 / (self.bpm * self.signature))
             
     def stop(self):
         self.running = False

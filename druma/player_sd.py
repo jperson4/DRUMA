@@ -3,14 +3,14 @@ import numpy as np
 import threading
 
 SRATE = 48000
-CHUNK = 1024 # TODO probar distintos tamaños
+CHUNK = 1024 // 2 # TODO probar distintos tamaños
 
 
 class Player:
     def __init__(self):
         self.buffer = np.empty(0)
-        print(sd.query_devices())
-        print(sd.default.device)
+        # print(sd.query_devices())
+        # print(sd.default.device)
         self.stream = sd.OutputStream(samplerate=SRATE, channels=1, blocksize=CHUNK, callback=self.callback)
         self.stream.start()
 
@@ -43,5 +43,7 @@ class Player:
             self.buffer = np.pad(self.buffer, (0, sound.size - self.buffer.size))
         elif sound.size < self.buffer.size:
             sound = np.pad(sound, (0, self.buffer.size - sound.size))
-        self.buffer = np.add(self.buffer, sound)
-    
+        try:
+            self.buffer = np.add(self.buffer, sound)
+        except Exception as e:
+            print("ERROR en play:", e)
