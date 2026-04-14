@@ -2,18 +2,19 @@ import asyncio
 from druma.clock import Clock
 from druma.sequencer import Sequencer
 from druma.sampler import Sampler
-from druma.player import Player
+from druma.player_pygame import Player
 # from druma.player_mock import Player
 
 class Druma:
     ''' Gestiona los componentes y conecta todo'''
 
-    def __init__(self, bpm=120, steps=16, sampler=Sampler()):
+    def __init__(self, bpm=120, steps=16, sampler=Sampler(), player=Player()):
         self.clock = Clock(CV=asyncio.Event(), bpm=bpm, steps=steps)
         self.sampler = sampler
         self.sequencer = Sequencer(self.sampler, steps=steps)
-        self.player = Player()
+        self.player = player
         self.playing = False
+        self.muted_instruments = set()
 
         self.selected_instrument = 0
 
@@ -58,6 +59,19 @@ class Druma:
         ins_name = self.sampler.get_instrument_name(_ins)
         if ins_name is not None:
             self.sampler.set_pitch(pitch, ins_name)
+            
+    def toggle_mute(self, instrument=None):
+        _ins = instrument or self.selected_instrument
+        ins_name = self.sampler.get_instrument_name(_ins)
+        if ins_name is not None:
+            self.sampler.toggle_mute(ins_name)
+            
+    def toggle_solo(self, instrument=None):
+        _ins = instrument or self.selected_instrument
+        ins_name = self.sampler.get_instrument_name(_ins)
+        if ins_name is not None:
+            self.sampler.toggle_solo(ins_name)
+        
             
     def get_instrument_pitch(self, instrument=None):
         _ins = instrument or self.selected_instrument

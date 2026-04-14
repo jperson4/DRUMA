@@ -1,12 +1,16 @@
 import numpy as np
 # from scipy.io import wavfile
 import soundfile as sf
-from druma.player import SRATE, CHUNK
+from druma.player_sd import SRATE, CHUNK
 
 class Sampler:
     def __init__(self, instruments={}):
         self.instruments = {}
         self.instruments_ord = []  # para mantener el orden de los instrumentos
+        
+        self.muted_instruments = set()
+        self.solo_instruments = set()
+        
         for name, (wavpath, volume, pitch) in instruments.items():
             self.update_instrument(name, wavpath, volume, pitch)
         # self.instruments_ord = list(self.instruments.keys())  # para mantener el orden de los instrumentos
@@ -16,11 +20,6 @@ class Sampler:
         ''' Devuelve el wavfile cargado y procesado con el volumen y el pitch'''
         try:
             wav = self.process_instrument(name, wavpath, volume, pitch)
-            if wav.ndim > 1:
-                wav = wav.mean(axis=1)  # convertir a mono si es estéreo # TODO hacerlo stereo en el futuro
-            wav = wav.astype(np.float32) / wav.max()
-            print(max(wav), min(wav))
-
             self.instruments[name] = (wav, volume, pitch, wavpath)
             self.instruments_ord.append(name)
         except Exception as e:
@@ -30,6 +29,9 @@ class Sampler:
         ''' Carga el wavfile y lo procesa con el volumen y el pitch'''
         # TODO por ahora ignora el pitch
         data, rate = sf.read(wavpath)
+        if data.ndim > 1:
+            data = data.mean(axis=1)  # convertir a mono si es estéreo # TODO hacerlo stereo en el futuro
+        data = data.astype(np.float32) / (max(abs(data)) + 1e-6)  # normalizar el wavfile
         data = data * volume
         # adapar el rate a SRATE
         if rate != SRATE:
@@ -49,13 +51,18 @@ class Sampler:
 
     def add_to_play(self, instrument, vol=1, accent=False):
         if instrument in self.instruments:
+            if instrument in self.muted_instruments:# si esta muteado, no se reproduce
+                return
+            if len(self.solo_instruments) > 0:
+                if instrument not in self.solo_instruments: # si hay instrumentos en solo, solo se reproducen esos
+                    return
             self.currently_playing.append((*self.instruments[instrument], vol, accent))
 
     def play(self):
         ''' Devuelve un np.array con la mezcla de los sonidos que se deben reproducir en el siguiente tick del reloj'''
         # TODO accent not implemented
         ret = np.empty(0)
-        for wavfile, ins_vol, pitch, _, vol, accent in self.currently_playing:
+        for wavfile, ins_vol, pitch, _, vol, accent in self.currently_playing:            
             sound = self.process_sound(wavfile, ins_vol * vol, pitch)
             if ret.size < sound.size:
                 ret = np.pad(ret, (0, sound.size - ret.size))
@@ -63,8 +70,6 @@ class Sampler:
                 sound = np.pad(sound, (0, ret.size - sound.size))
             ret = np.add(ret, sound)
         self.currently_playing = []
-        if ret.size > 0:
-            print(max(ret), min(ret))
         return ret
 
     
@@ -90,3 +95,20 @@ class Sampler:
             wavfile, volume, pitch, wavpath = self.instruments[name]
             ret.append((name, volume, pitch))
         return ret
+    
+    def toggle_mute(self, instrument):
+        if instrument in self.instruments:
+            if instrument in self.muted_instruments:
+                self.muted_instruments.remove(instrument)
+            else:
+                self.muted_instruments.add(instrument)
+                
+    def toggle_solo(self, instrument):
+        if instrument in self.instruments:
+            if instrument in self.muted_instruments:
+                self.muted_instruments.remove(instrument)
+            
+            if instrument in self.solo_instruments:
+                self.solo_instruments.remove(instrument)
+            else:
+                self.solo_instruments.add(instrument)

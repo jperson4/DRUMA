@@ -1,85 +1,69 @@
 import asyncio
-import keyboard
+import evdev
+from evdev import ecodes
 from control.message import *
 from control.drumacontrol import SequencerControl
 
 class keyboardControl:
     def __init__(self, druma):
         self.drumaControl = SequencerControl(druma)
+        self.device = self._find_keyboard()
+
+    def _find_keyboard(self):
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        
+        # muestra todos para que puedas identificar el tuyo
+        for d in devices:
+            print(f"{d.path} | {d.name} | caps: {list(d.capabilities().keys())}")
+        
+        # filtra por nombre (ajusta el string a tu teclado)
+        keyboards = [
+            d for d in devices
+            if ecodes.EV_KEY in d.capabilities()
+            and ecodes.EV_REL not in d.capabilities()  # excluye ratones
+            and len(d.capabilities()[ecodes.EV_KEY]) > 20  # excluye botones simples
+        ]
+        
+        if not keyboards:
+            raise RuntimeError("No keyboard found")
+        
+        # coge el que más teclas tiene
+        best = max(keyboards, key=lambda d: len(d.capabilities()[ecodes.EV_KEY]))
+        print(f"Using device: {best.name} ({best.path})")
+        return best
 
     async def start(self):
-        
         loop = asyncio.get_event_loop()
+        async for event in self.device.async_read_loop():
+            if event.type == ecodes.EV_KEY:
+                key_event = evdev.categorize(event)
+                if key_event.keystate == evdev.KeyEvent.key_down:
+                    print(f"Key pressed: {key_event.keycode}")
+                    m = self.translate_msg(key_event)
+                    if m is not None:
+                        self.drumaControl.handle_msg(m)
 
-        def on_key(event):
-            if event.event_type == keyboard.KEY_DOWN:
-                m = self.translate_msg(event)
-                if m is not None:
-                    # llama al handler de forma thread-safe
-                    loop.call_soon_threadsafe(self.drumaControl.handle_msg, m)
+    KEYMAP = {
+        "1": MsgStep(0),  "q": MsgStep(1),
+        "2": MsgStep(2),  "w": MsgStep(3),
+        "3": MsgStep(4),  "e": MsgStep(5),
+        "4": MsgStep(6),  "r": MsgStep(7),
+        "5": MsgStep(8),  "t": MsgStep(9),
+        "6": MsgStep(10), "y": MsgStep(11),
+        "7": MsgStep(12), "u": MsgStep(13),
+        "8": MsgStep(14), "i": MsgStep(15),
+        "a": MsgInstrument(0), "s": MsgInstrument(1),
+        "d": MsgInstrument(2), "f": MsgInstrument(3),
+        "g": MsgInstrument(4), "h": MsgInstrument(5),
+        "j": MsgInstrument(6),
+        "up":    MsgVolume_Increment(.1),
+        "down":  MsgVolume_Increment(-.1),
+        "left":  MsgPitch_Increment(-.1),
+        "right": MsgPitch_Increment(.1),
+        "space": MsgMute(),
+        "shift": MsgSolo(),
+    }
 
-        keyboard.hook(on_key)
-        while True:
-            await asyncio.sleep(1) # mantener el loop corriendo
-
-    def translate_msg(self, event) -> Message:
-        ''' Traduce el evento del teclado a una acción en el secuenciador'''
-        k = event.name
-        if k == '1':
-            return MsgStep(0)
-        elif k == 'q':
-            return MsgStep(1)
-        elif k == '2':
-            return MsgStep(2)
-        elif k == 'w':
-            return MsgStep(3)
-        elif k == '3':
-            return MsgStep(4)
-        elif k == 'e':
-            return MsgStep(5)
-        elif k == '4':
-            return MsgStep(6)
-        elif k == 'r':
-            return MsgStep(7)
-        elif k == '5':
-            return MsgStep(8)
-        elif k == 't':
-            return MsgStep(9)
-        elif k == '6':
-            return MsgStep(10)
-        elif k == 'y':
-            return MsgStep(11)
-        elif k == '7':
-            return MsgStep(12)
-        elif k == 'u':
-            return MsgStep(13)
-        elif k == '8':
-            return MsgStep(14)
-        elif k == 'i':
-            return MsgStep(15)
-        elif k == 'a':
-            return MsgInstrument(0)
-        elif k == 's':
-            return MsgInstrument(1)
-        elif k == 'd':
-            return MsgInstrument(2)
-        elif k == 'f':
-            return MsgInstrument(3)
-        elif k == 'g':
-            return MsgInstrument(4)
-        elif k == 'h':
-            return MsgInstrument(5)
-        elif k == 'j':
-            return MsgInstrument(6)
-        elif k == 'up':
-            return MsgVolume_Increment(.1)
-        elif k == 'down':
-            return MsgVolume_Increment(-.1)
-        elif k == 'left':
-            return MsgPitch_Increment(-.1)
-        elif k == 'right':
-            return MsgPitch_Increment(.1)
-        elif k == 'space':
-            return MsgMute()
-        else:
-            return None
+    def translate_msg(self, key) -> Message:
+        k = key.keycode.replace("KEY_", "").lower()
+        return self.KEYMAP.get(k, None)

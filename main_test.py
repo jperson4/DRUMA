@@ -1,6 +1,7 @@
 import asyncio
 from druma.druma import Druma
 from druma.sampler import Sampler
+from druma.player_sd import Player
 from view.terminal.main import mainview
 from control.keyboardcontrol import keyboardControl
 
@@ -14,10 +15,13 @@ async def main():
         'snare': ('samples/909_simple/Snare.wav', 1, 1),
         'clap': ('samples/909_simple/Clap.wav', 1, 1),
     })
+    
+    player = Player()
 
     druma = Druma(
         bpm=140,
-        sampler=sampler
+        sampler=sampler,
+        player=player
     )
     
     controller = keyboardControl(druma)

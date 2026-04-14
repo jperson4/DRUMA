@@ -11,6 +11,7 @@ class MessageType(Enum):
     PITCH = 7
     PITCH_INCREMENT = 8
     MUTE = 9
+    SOLO = 10
 
 class Message:
     def __init__(self, type):
@@ -63,5 +64,11 @@ class MsgPitch_Increment(Message):
         self.pitch = pitch
 
 class MsgMute(Message):
-    def __init__(self):
+    def __init__(self, instrument=None):
         super().__init__(MessageType.MUTE)
+        self.instrument = instrument
+
+class MsgSolo(Message):
+    def __init__(self, instrument=None):
+        super().__init__(MessageType.SOLO)
+        self.instrument = instrument

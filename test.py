@@ -1,9 +1,7 @@
-import sounddevice as sd
-import numpy as np
+from pynput import keyboard
 
-duration = 2
-freq = 440
-t = np.linspace(0, duration, int(44100 * duration))
-tone = np.sin(2 * np.pi * freq * t).astype(np.float32)
-sd.play(tone, samplerate=44100)
-sd.wait()
+def on_press(key):
+    print(f"Key pressed: {key}")
+
+with keyboard.Listener(on_press=on_press) as listener:
+    listener.join()

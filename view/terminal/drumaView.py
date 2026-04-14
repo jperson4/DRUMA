@@ -20,12 +20,23 @@ class DrumaView:
             ret += inst
             
         ret += "\nPatterns:\n"
-        general_pattern = [0] * self.druma.get_steps()
-        general_pattern[curr_step] = 1
-        ret += self.display_pattern(general_pattern, curr_step) + " : Current step\n"
+        ret += self.display_controls(curr_step) + " : Current step\n"
         for name, _, _ in instruments:
             ret += f"{self.display_pattern(patterns[name], curr_step)} : {name}\n"
         return ret
+    
+    def display_controls(self, curr_step):
+        c = '1q2w3e4r5t6y7u8i'
+        ret = ''
+        for step, value in enumerate(c):
+            if step % 4 == 0:
+                ret += ' '
+            if step == curr_step:
+                ret += color(value, 'yellow')
+            else:
+                ret += value
+        return ret
+            
 
     def display_pattern(self, pattern, curr_step):
         ret = ""
